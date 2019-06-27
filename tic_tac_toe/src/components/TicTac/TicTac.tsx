@@ -11,9 +11,9 @@ export class TicTac extends React.Component<any, TicTacState> {
   state: TicTacState = {
     isYourTurn: true,
     values: [
-      [FieldType.NONE, FieldType.NONE, FieldType.NONE],
-      [FieldType.NONE, FieldType.NONE, FieldType.NONE],
-      [FieldType.NONE, FieldType.NONE, FieldType.NONE],
+      [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
+      [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
+      [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
     ]
   };
 
@@ -21,9 +21,9 @@ export class TicTac extends React.Component<any, TicTacState> {
     this.setState({
       isYourTurn: true,
       values: [
-        [FieldType.NONE, FieldType.NONE, FieldType.NONE],
-        [FieldType.NONE, FieldType.NONE, FieldType.NONE],
-        [FieldType.NONE, FieldType.NONE, FieldType.NONE],
+        [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
+        [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
+        [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
       ]
     })
   }
@@ -39,7 +39,7 @@ export class TicTac extends React.Component<any, TicTacState> {
   handleBoxPress = (row: number, column: number) => () => {
     const { isYourTurn,values } = this.state;
     if (!isYourTurn) return console.log("is not your turn");
-    if(values[row][column] !== FieldType.NONE) return console.warn('this field have been already taken')
+    if(values[row][column] !== FieldType.EMPTY) return console.warn('this field have been already taken')
     values[row][column] = FieldType.X;
     this.setState({
       values: values,

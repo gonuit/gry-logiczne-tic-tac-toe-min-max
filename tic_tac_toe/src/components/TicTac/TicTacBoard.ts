@@ -6,7 +6,7 @@ export enum Player {
 export enum FieldType {
   X,
   O,
-  NONE
+  EMPTY
 }
 
 export enum WinnerType {
@@ -42,19 +42,20 @@ export class TicTacBoard {
 
   public isEnd = (): WinnerType => {
     const centerValue = this.values[1][1];
-    if (centerValue === null) return WinnerType.NONE;
-    if (
-      (this.values[0][0] === centerValue &&
-        this.values[2][2] === centerValue) ||
-      (this.values[0][2] === centerValue && this.values[2][0] === centerValue)
-    ) {
-      return centerValue === FieldType.X ? WinnerType.X : WinnerType.O;
+    if (centerValue !== FieldType.EMPTY) {
+      if (
+        (this.values[0][0] === centerValue &&
+          this.values[2][2] === centerValue) ||
+        (this.values[0][2] === centerValue && this.values[2][0] === centerValue)
+      ) {
+        return centerValue === FieldType.X ? WinnerType.X : WinnerType.O;
+      }
     }
 
     for (let index = 0; index < TicTacBoard.BOARD_SIZE; index++) {
       if (
         this.values[index].every(
-          elem => typeof elem === "boolean" && elem === this.values[index][0]
+          elem => elem !== FieldType.EMPTY  && elem === this.values[index][0]
         )
       ) {
         return this.values[index][0] === FieldType.X
@@ -62,7 +63,7 @@ export class TicTacBoard {
           : WinnerType.O;
       }
       const firstValue = this.values[0][index];
-      if (firstValue === null) continue;
+      if (firstValue === FieldType.EMPTY) continue;
       if (
         this.values[0][index] === firstValue &&
         this.values[1][index] === firstValue &&
@@ -84,7 +85,7 @@ export class TicTacBoard {
     const { BOARD_SIZE } = TicTacBoard;
     for (let row = 0; row < BOARD_SIZE; row++) {
       for (let column = 0; column < BOARD_SIZE; column++) {
-        if (this.values[row][column] === FieldType.NONE)
+        if (this.values[row][column] === FieldType.EMPTY)
           possiblePositions.push({ row, column });
       }
     }
@@ -109,8 +110,9 @@ export class TicTacBoard {
           return MIN_MAX_DRAW_RESULT;
       }
     }
-    if (maximizing) this.maximize();
+    if (maximizing) {
+      const possiblePositions = board.getPossiblePositions();
+      possiblePositions.forEach((position: Position) => {});
+    }
   };
-
-  private maximize = () => {};
 }
