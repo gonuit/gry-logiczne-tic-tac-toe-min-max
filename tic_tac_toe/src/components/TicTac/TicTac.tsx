@@ -1,6 +1,6 @@
 import React from "react";
 import "./style.css";
-import { TicTacBoard, TicTacBoardData } from "./TicTacBoard";
+import { TicTacBoard, TicTacBoardData, FieldType } from "./TicTacBoard";
 
 interface TicTacState {
   isYourTurn: boolean;
@@ -11,14 +11,26 @@ export class TicTac extends React.Component<any, TicTacState> {
   state: TicTacState = {
     isYourTurn: true,
     values: [
-      [null, null, null],
-      [null, null, null],
-      [null, null, null],
+      [FieldType.NONE, FieldType.NONE, FieldType.NONE],
+      [FieldType.NONE, FieldType.NONE, FieldType.NONE],
+      [FieldType.NONE, FieldType.NONE, FieldType.NONE],
     ]
   };
 
+  resetGame = () => {
+    this.setState({
+      isYourTurn: true,
+      values: [
+        [FieldType.NONE, FieldType.NONE, FieldType.NONE],
+        [FieldType.NONE, FieldType.NONE, FieldType.NONE],
+        [FieldType.NONE, FieldType.NONE, FieldType.NONE],
+      ]
+    })
+  }
+
   handleEnemyTurn = () => {
-    console.log('isEnd', TicTacBoard.isEnd(this.state.values))
+    const tb =  new TicTacBoard(this.state.values)
+    console.log('isEnd', tb.isEnd())
     this.setState({
       isYourTurn: true
     })
@@ -27,8 +39,8 @@ export class TicTac extends React.Component<any, TicTacState> {
   handleBoxPress = (row: number, column: number) => () => {
     const { isYourTurn,values } = this.state;
     if (!isYourTurn) return console.log("is not your turn");
-    if(values[row][column] !== null) return console.warn('this field have been already taken')
-    values[row][column] = true;
+    if(values[row][column] !== FieldType.NONE) return console.warn('this field have been already taken')
+    values[row][column] = FieldType.X;
     this.setState({
       values: values,
       isYourTurn: false
@@ -37,8 +49,11 @@ export class TicTac extends React.Component<any, TicTacState> {
 
   getCircleOrCross = (row: number, column: number): string => {
     const value = this.state.values[row][column]
-    if(typeof value !== 'boolean') return ""
-    return value === true ? "X" : "O" 
+    switch(value){
+      case FieldType.X: return "X"
+      case FieldType.O: return "O"
+      default: return ""
+    }
   }
 
   render() {
@@ -70,4 +85,5 @@ export class TicTac extends React.Component<any, TicTacState> {
       </div>
     );
   }
+
 }
