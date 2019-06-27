@@ -15,7 +15,9 @@ import {
   MainView,
   Possibilities,
   PossibilityContainer,
-  Value
+  Value,
+  Button,
+  GameState
 } from "./styled";
 
 interface PossibilityData {
@@ -49,7 +51,9 @@ export class TicTac extends React.Component<any, TicTacState> {
         [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
         [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
         [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY]
-      ]
+      ],
+      rowsOfPossibilities: [],
+      gameState: WinnerType.NONE
     });
   };
 
@@ -105,12 +109,15 @@ export class TicTac extends React.Component<any, TicTacState> {
     );
   };
 
-  addNextPossibilitesRow = (positions: Array<PositionInfo>, prevValues?: TicTacBoardData) => {
-    if(!prevValues) return console.error('prevValues undefined')
+  addNextPossibilitesRow = (
+    positions: Array<PositionInfo>,
+    prevValues?: TicTacBoardData
+  ) => {
+    if (!prevValues) return console.error("prevValues undefined");
     this.setState(
       produce<TicTacState>((state: TicTacState) => {
         const tb = new TicTacBoard(prevValues);
-        state.rowsOfPossibilities.push({positions, values: prevValues});
+        state.rowsOfPossibilities.push({ positions, values: prevValues });
       })
     );
   };
@@ -118,18 +125,30 @@ export class TicTac extends React.Component<any, TicTacState> {
   handleAddNextPossibilityRow = (
     currentValues: TicTacBoardData,
     currentTypeOfPlayer: Player,
-    index: number
+    possibilityRowIndex: number,
+    possibilityPositionIndex: number
   ) => () => {
-    console.log("NEXT");
-    this.setState(produce<TicTacState>((state) => {
-      state.rowsOfPossibilities.length = index + 1
-    }))
+    this.setState(
+      produce<TicTacState>(state => {
+        state.rowsOfPossibilities.length = possibilityRowIndex + 1;
+        state.rowsOfPossibilities[
+          possibilityRowIndex
+        ].positions = state.rowsOfPossibilities[
+          possibilityRowIndex
+        ].positions.map((elem, positionIndex) => {
+          return {
+            ...elem,
+            clicked: positionIndex === possibilityPositionIndex
+          };
+        });
+      })
+    );
     const tb = new TicTacBoard(currentValues);
-    tb.getBestMove({ 
+    tb.getBestMove({
       positionsWithCostsCallback: this.addNextPossibilitesRow,
-       maximizing: currentTypeOfPlayer === Player.O ? true : false,
-       currentValues,
-       });
+      maximizing: currentTypeOfPlayer === Player.O ? true : false,
+      currentValues
+    });
   };
 
   renderPossibilityRow = (
@@ -137,40 +156,63 @@ export class TicTac extends React.Component<any, TicTacState> {
     values: TicTacBoardData,
     possibilityRowIndex: number
   ) => {
-    return positions.map(({ cost, column, row, typeOfPlayer, seleced }) => {
-      const currentValues = produce(values, draft => {
-        draft[row][column] =
-          typeOfPlayer === Player.X ? FieldType.X : FieldType.O;
-      });
+    return positions.map(
+      (
+        { cost, column, row, typeOfPlayer, seleced, clicked },
+        possibilityPositionIndex
+      ) => {
+        const currentValues = produce(values, draft => {
+          draft[row][column] =
+            typeOfPlayer === Player.X ? FieldType.X : FieldType.O;
+        });
 
-      return (
-        <PossibilityContainer
-          key={`${column}-${row}-${typeOfPlayer}`}
-          selected={seleced}
-          onClick={this.handleAddNextPossibilityRow(
-            currentValues,
-            typeOfPlayer,
-            possibilityRowIndex,
-          )}
-        >
-          <TicTacToeBoard size={100} values={currentValues} />
-          <Value>cost: {cost}</Value>
-        </PossibilityContainer>
-      );
-    });
+        return (
+          <PossibilityContainer
+            clicked={clicked}
+            key={`${column}-${row}-${typeOfPlayer}`}
+            selected={seleced}
+            onClick={this.handleAddNextPossibilityRow(
+              currentValues,
+              typeOfPlayer,
+              possibilityRowIndex,
+              possibilityPositionIndex
+            )}
+          >
+            <TicTacToeBoard size={100} values={currentValues} />
+            <Value>cost: {cost}</Value>
+          </PossibilityContainer>
+        );
+      }
+    );
   };
 
   renderPosibilites = () => {
     return this.state.rowsOfPossibilities.map(
       ({ positions, values }, possibilityRowIndex) => (
-        <Possibilities key={`${possibilityRowIndex}-${positions.length}-${values.length}`}>
+        <Possibilities
+          key={`${possibilityRowIndex}-${positions.length}-${values.length}`}
+        >
           {this.renderPossibilityRow(positions, values, possibilityRowIndex)}
         </Possibilities>
       )
     );
   };
 
+  gameStateToText = (gameState: WinnerType) => {
+    switch (gameState) {
+      case WinnerType.O:
+        return "O wins!";
+      case WinnerType.X:
+        return "X wins!";
+      case WinnerType.REMIS:
+        return "DRAW!";
+      default:
+        return "";
+    }
+  };
+
   render() {
+    const { gameState } = this.state;
     return (
       <Container>
         <MainView>
@@ -178,6 +220,12 @@ export class TicTac extends React.Component<any, TicTacState> {
             values={this.state.values}
             handleBoxPress={this.handleBoxPress}
           />
+          {gameState !== WinnerType.NONE && (
+            <>
+              <GameState>{this.gameStateToText(gameState)}</GameState>
+              <Button onClick={this.resetGame}>Play again</Button>
+            </>
+          )}
         </MainView>
         {this.renderPosibilites()}
       </Container>

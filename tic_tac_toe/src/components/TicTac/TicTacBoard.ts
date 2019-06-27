@@ -34,6 +34,7 @@ export interface PositionWithCost extends Position {
 export interface PositionInfo extends PositionWithCost {
   typeOfPlayer: Player;
   seleced: boolean;
+  clicked?: boolean;
 }
 
 export type BestMoveConfig = {
