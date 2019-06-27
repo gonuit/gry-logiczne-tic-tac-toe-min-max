@@ -17,7 +17,12 @@ import {
   PossibilityContainer,
   Value,
   Button,
-  GameState
+  GameState,
+  LegendContainer,
+  LegendItemContainer,
+  LegendBoxSelected,
+  LegendBoxClicked,
+  LegendBoxDescription
 } from "./styled";
 
 interface PossibilityData {
@@ -43,7 +48,7 @@ export class TicTac extends React.Component<any, TicTacState> {
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY]
     ],
     rowsOfPossibilities: [],
-    started: false,
+    started: false
   };
 
   resetGame = () => {
@@ -56,7 +61,7 @@ export class TicTac extends React.Component<any, TicTacState> {
       ],
       rowsOfPossibilities: [],
       gameState: WinnerType.NONE,
-      started: false,
+      started: false
     });
   };
 
@@ -185,17 +190,38 @@ export class TicTac extends React.Component<any, TicTacState> {
     );
   };
 
-  renderPosibilites = () => {
-    return this.state.rowsOfPossibilities.map(
-      ({ positions, values }, possibilityRowIndex) => (
-        <Possibilities
-          key={`${possibilityRowIndex}-${positions.length}-${values.length}`}
-        >
-          {this.renderPossibilityRow(positions, values, possibilityRowIndex)}
-        </Possibilities>
-      )
-    );
-  };
+  renderPosibilites = () =>
+    this.state.rowsOfPossibilities.length > 0 ? (
+      <>
+        {this.state.rowsOfPossibilities.map(
+          ({ positions, values }, possibilityRowIndex) => (
+            <Possibilities
+              key={`${possibilityRowIndex}-${positions.length}-${
+                values.length
+              }`}
+            >
+              {this.renderPossibilityRow(
+                positions,
+                values,
+                possibilityRowIndex
+              )}
+            </Possibilities>
+          )
+        )}
+        <LegendContainer>
+          <LegendItemContainer>
+            <LegendBoxSelected />
+            <LegendBoxDescription>
+              - path selected by algorith
+            </LegendBoxDescription>
+          </LegendItemContainer>
+          <LegendItemContainer>
+            <LegendBoxClicked />
+            <LegendBoxDescription>- path selected by user</LegendBoxDescription>
+          </LegendItemContainer>
+        </LegendContainer>
+      </>
+    ) : null;
 
   gameStateToText = (gameState: WinnerType) => {
     switch (gameState) {
@@ -211,7 +237,7 @@ export class TicTac extends React.Component<any, TicTacState> {
   };
 
   render() {
-    const { gameState,started } = this.state;
+    const { gameState, started } = this.state;
     return (
       <Container>
         <MainView>
@@ -220,7 +246,11 @@ export class TicTac extends React.Component<any, TicTacState> {
             handleBoxPress={this.handleBoxPress}
           />
           <GameState>{this.gameStateToText(gameState)}</GameState>
-          <Button disabled={!started} diableStyle={!started} onClick={this.resetGame}>
+          <Button
+            disabled={!started}
+            diableStyle={!started}
+            onClick={this.resetGame}
+          >
             {gameState !== WinnerType.NONE ? "Play again" : "Restart"}
           </Button>
         </MainView>
