@@ -9,7 +9,7 @@ const App: React.FC = () => {
         <p>
           Tic tac toe
         </p>
-        <span>game example</span>
+        <span>min-max example</span>
       </header>
       <div className="appContent">
       <TicTac />

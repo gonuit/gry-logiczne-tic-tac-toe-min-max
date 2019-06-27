@@ -27,18 +27,26 @@ export type Position = {
   column: number;
 };
 
+export interface PositionWithCost extends Position {
+  cost: number;
+}
+
 export type BestMoveConfig = {
   depth?: number;
-  maximizing: boolean;
+  maximizing?: boolean;
   board?: TicTacBoard;
+  position?: Position;
 };
 
 export class TicTacBoard {
   private static BOARD_SIZE = 3;
-  private static MIN_MAX_RESULT_VALUE = 10;
+  private static MIN_MAX_RESULT_VALUE = 100;
   private static MIN_MAX_DRAW_RESULT = 0;
+  private static MIN_MAX_DEPTH_INCREMENT_VALUE = 1;
 
   constructor(private values: TicTacBoardData) {}
+
+  private isEmptyField = () => this.values.flat().some((elem) => elem === FieldType.EMPTY)
 
   public isEnd = (): WinnerType => {
     const centerValue = this.values[1][1];
@@ -55,7 +63,7 @@ export class TicTacBoard {
     for (let index = 0; index < TicTacBoard.BOARD_SIZE; index++) {
       if (
         this.values[index].every(
-          elem => elem !== FieldType.EMPTY  && elem === this.values[index][0]
+          elem => elem !== FieldType.EMPTY && elem === this.values[index][0]
         )
       ) {
         return this.values[index][0] === FieldType.X
@@ -72,12 +80,13 @@ export class TicTacBoard {
         return firstValue === FieldType.X ? WinnerType.X : WinnerType.O;
       }
     }
-    return WinnerType.NONE;
+    return this.isEmptyField() ? WinnerType.NONE : WinnerType.REMIS 
   };
+
   put = (position: Position, player: Player): TicTacBoard => {
-    const values = JSON.parse(JSON.stringify(this.values)); // prevent shallow copy
-    values[position.row][position.column] = Player.O ? false : true;
-    return new TicTacBoard(values[position.row][position.column]);
+    const values: TicTacBoardData = JSON.parse(JSON.stringify(this.values)); // prevent shallow copy
+    values[position.row][position.column] = player === Player.O ? FieldType.O : FieldType.X;
+    return new TicTacBoard(values);
   };
 
   getPossiblePositions = (): Array<Position> => {
@@ -93,26 +102,51 @@ export class TicTacBoard {
   };
 
   getBestMove = ({
-    board = this,
     maximizing = true,
-    depth = 0
-  }: BestMoveConfig): number | undefined => {
+    depth = 0,
+    position = { column: -1, row: -1 }
+  }: BestMoveConfig = {}): PositionWithCost => {
+    const {
+      MIN_MAX_DRAW_RESULT,
+      MIN_MAX_RESULT_VALUE,
+      MIN_MAX_DEPTH_INCREMENT_VALUE
+    } = TicTacBoard;
     // Jeśli gra zakończona zwróć wartość
-    const isEnd = board.isEnd();
+    const isEnd = this.isEnd();
     if (isEnd !== WinnerType.NONE) {
-      const { MIN_MAX_DRAW_RESULT, MIN_MAX_RESULT_VALUE } = TicTacBoard;
       switch (isEnd) {
         case WinnerType.X:
-          return MIN_MAX_RESULT_VALUE - depth;
+          return { ...position, cost: MIN_MAX_RESULT_VALUE - depth };
         case WinnerType.O:
-          return -MIN_MAX_RESULT_VALUE + depth;
-        case WinnerType.REMIS:
-          return MIN_MAX_DRAW_RESULT;
+          return { ...position, cost: -MIN_MAX_RESULT_VALUE + depth };
+        case WinnerType.REMIS: 
+          return { ...position, cost: MIN_MAX_DRAW_RESULT };
       }
     }
-    if (maximizing) {
-      const possiblePositions = board.getPossiblePositions();
-      possiblePositions.forEach((position: Position) => {});
+    // Pobierz możliwe pozycje
+    const possiblePositions: Array<Position> = this.getPossiblePositions();
+    const positionsWithCost: Array<PositionWithCost> = possiblePositions.map<
+      PositionWithCost
+    >(
+      (position: Position): PositionWithCost => {
+        const newBoard: TicTacBoard = this.put(position, maximizing ? Player.O : Player.X);
+        const elem = newBoard.getBestMove({
+          maximizing: false,
+          depth: depth + MIN_MAX_DEPTH_INCREMENT_VALUE,
+          position
+        });
+        const { cost } = elem
+        return { ...position, cost };
+      }
+    );
+    if (!maximizing) {
+      // Sortuj rosnąco na podstawie kosztu i pobierz najwiekszy koszt
+      const [maxElem] = positionsWithCost.sort(({ cost: costA }, { cost: costB }) => costB - costA)
+      return maxElem 
+    } else {
+      // Sortuj majejąco na podstawie kosztu i pobierz najmniejszy
+      const [minElem] = positionsWithCost.sort(({ cost: costA }, { cost: costB }) => costA - costB)
+      return minElem 
     }
   };
 }
