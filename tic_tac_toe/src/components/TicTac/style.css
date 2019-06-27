@@ -1,0 +1,32 @@
+.tictac-container {
+  height: 300px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tictac-line {
+  height: 1px;
+  background-color: white;
+  width: 100%;
+}
+
+.tictac-vert-line {
+  width: 1px;
+  background-color: white;
+  height: 100%;
+}
+
+.tictac-row {
+  display: flex;
+  flex-direction: row;
+  height: 100px;
+}
+
+.tictac-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  width: 100px;
+}
