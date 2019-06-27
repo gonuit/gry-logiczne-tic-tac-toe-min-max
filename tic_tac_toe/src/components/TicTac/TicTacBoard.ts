@@ -46,7 +46,8 @@ export class TicTacBoard {
 
   constructor(private values: TicTacBoardData) {}
 
-  private isEmptyField = () => this.values.flat().some((elem) => elem === FieldType.EMPTY)
+  private isEmptyField = () =>
+    this.values.flat().some(elem => elem === FieldType.EMPTY);
 
   public isEnd = (): WinnerType => {
     const centerValue = this.values[1][1];
@@ -80,12 +81,13 @@ export class TicTacBoard {
         return firstValue === FieldType.X ? WinnerType.X : WinnerType.O;
       }
     }
-    return this.isEmptyField() ? WinnerType.NONE : WinnerType.REMIS 
+    return this.isEmptyField() ? WinnerType.NONE : WinnerType.REMIS;
   };
 
   put = (position: Position, player: Player): TicTacBoard => {
     const values: TicTacBoardData = JSON.parse(JSON.stringify(this.values)); // prevent shallow copy
-    values[position.row][position.column] = player === Player.O ? FieldType.O : FieldType.X;
+    values[position.row][position.column] =
+      player === Player.O ? FieldType.O : FieldType.X;
     return new TicTacBoard(values);
   };
 
@@ -102,7 +104,7 @@ export class TicTacBoard {
   };
 
   getBestMove = ({
-    maximizing = true,
+    maximizing = false,
     depth = 0,
     position = { column: -1, row: -1 }
   }: BestMoveConfig = {}): PositionWithCost => {
@@ -119,7 +121,7 @@ export class TicTacBoard {
           return { ...position, cost: MIN_MAX_RESULT_VALUE - depth };
         case WinnerType.O:
           return { ...position, cost: -MIN_MAX_RESULT_VALUE + depth };
-        case WinnerType.REMIS: 
+        case WinnerType.REMIS:
           return { ...position, cost: MIN_MAX_DRAW_RESULT };
       }
     }
@@ -129,24 +131,42 @@ export class TicTacBoard {
       PositionWithCost
     >(
       (position: Position): PositionWithCost => {
-        const newBoard: TicTacBoard = this.put(position, maximizing ? Player.O : Player.X);
+        const newBoard: TicTacBoard = this.put(
+          position,
+          maximizing ? Player.X : Player.O
+        );
         const elem = newBoard.getBestMove({
-          maximizing: false,
+          maximizing: !maximizing,
           depth: depth + MIN_MAX_DEPTH_INCREMENT_VALUE,
           position
         });
-        const { cost } = elem
+        const { cost } = elem;
         return { ...position, cost };
       }
     );
-    if (!maximizing) {
-      // Sortuj rosnąco na podstawie kosztu i pobierz najwiekszy koszt
-      const [maxElem] = positionsWithCost.sort(({ cost: costA }, { cost: costB }) => costB - costA)
-      return maxElem 
-    } else {
-      // Sortuj majejąco na podstawie kosztu i pobierz najmniejszy
-      const [minElem] = positionsWithCost.sort(({ cost: costA }, { cost: costB }) => costA - costB)
-      return minElem 
-    }
+    // Sortuj rosnąco/malejaco na podstawie kosztu i pobierz najwiekszy/najmniejszy koszt
+    const [minMaxElem] = positionsWithCost.sort(
+      maximizing
+        ? this.descPositonWithCostArraySort
+        : this.ascPositonWithCostArraySort
+    );
+    // pobierz tablicę najwiekszych/najmniejszych elementow
+    const minMaxElemsPositions: Array<
+      PositionWithCost
+    > = positionsWithCost.filter(({ cost }) => cost === minMaxElem.cost);
+    return this.getRandomItemFromArray(minMaxElemsPositions);
   };
+
+  private getRandomItemFromArray = <T>(items: Array<T>): T =>
+    items[Math.floor(Math.random() * items.length)];
+
+  private descPositonWithCostArraySort = (
+    { cost: costA }: PositionWithCost,
+    { cost: costB }: PositionWithCost
+  ): number => costB - costA;
+
+  private ascPositonWithCostArraySort = (
+    { cost: costA }: PositionWithCost,
+    { cost: costB }: PositionWithCost
+  ): number => costA - costB;
 }
