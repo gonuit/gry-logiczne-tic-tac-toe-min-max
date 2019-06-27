@@ -10,12 +10,19 @@ import {
   Player
 } from "./TicTacBoard";
 import { TicTacToeBoard } from "../TicTacToeBoard/TicTacToeBoard";
-import { Container, MainView, Possibilities } from "./styled";
+import {
+  Container,
+  MainView,
+  Possibilities,
+  PossibilityContainer,
+  Value
+} from "./styled";
 
 interface TicTacState {
   isYourTurn: boolean;
   values: TicTacBoardData;
   gameState: WinnerType;
+  possibilitiesValue: TicTacBoardData;
   rowsOfPossibilities: Array<PositionInfo>;
 }
 
@@ -24,6 +31,11 @@ export class TicTac extends React.Component<any, TicTacState> {
     isYourTurn: true,
     gameState: WinnerType.NONE,
     values: [
+      [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
+      [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
+      [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY]
+    ],
+    possibilitiesValue: [
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY]
@@ -42,11 +54,12 @@ export class TicTac extends React.Component<any, TicTacState> {
     });
   };
 
-  generatePosibilitiesWithCosts = (positionsWithCosts: Array<PositionInfo>) => {
+  generatePosibilitiesWithCosts = (positions: Array<PositionInfo>) => {
     this.setState({
-      rowsOfPossibilities: positionsWithCosts
+      rowsOfPossibilities: positions,
+      possibilitiesValue: JSON.parse(JSON.stringify(this.state.values))
     });
-    console.log("callback", positionsWithCosts);
+    console.log("callback", positions);
   };
 
   checkIfGameEnded = (value: TicTacBoardData): WinnerType =>
@@ -89,27 +102,38 @@ export class TicTac extends React.Component<any, TicTacState> {
     );
   };
 
-  render() {
+  renderPosibilites = () => {
     return (
-      <Container>
-        <MainView>
-        <TicTacToeBoard
-          values={this.state.values}
-          handleBoxPress={this.handleBoxPress}
-        />
-        </MainView>
-        <Possibilities>
-          {this.state.rowsOfPossibilities.map(
-            ({ column, row, typeOfPlayer }) => (
+      <Possibilities>
+        {this.state.rowsOfPossibilities.map(
+          ({ cost, column, row, typeOfPlayer, seleced }) => (
+            <PossibilityContainer selected={seleced}>
               <TicTacToeBoard
-                values={produce(this.state.values, draft => {
+                size={100}
+                key={`${column}-${row}-${typeOfPlayer}`}
+                values={produce(this.state.possibilitiesValue, draft => {
                   draft[row][column] =
                     typeOfPlayer === Player.X ? FieldType.X : FieldType.O;
                 })}
               />
-            )
-          )}
-        </Possibilities>
+              <Value>cost: {cost}</Value>
+            </PossibilityContainer>
+          )
+        )}
+      </Possibilities>
+    );
+  };
+
+  render() {
+    return (
+      <Container>
+        <MainView>
+          <TicTacToeBoard
+            values={this.state.values}
+            handleBoxPress={this.handleBoxPress}
+          />
+        </MainView>
+        {this.renderPosibilites()}
       </Container>
     );
   }

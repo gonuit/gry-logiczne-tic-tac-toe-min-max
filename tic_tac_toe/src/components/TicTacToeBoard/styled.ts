@@ -1,10 +1,15 @@
 import styled from "styled-components";
 
-export const Container = styled.div`
-  height: 300px;
-  width: 300px;
-  display: flex;
-  flex-direction: column;
+interface ContainerProps {
+  size?: number
+}
+
+export const Container = styled.div<ContainerProps>`
+  height:${({ size }) => size || 300}px;
+  width: ${({ size }) => size || 300}px;
+  display: inline-block;
+  vertical-align: top;
+  margin: 10px;
 `;
 export const Line = styled.div`
   height: 1px;
@@ -18,19 +23,20 @@ export const VertLine = styled.div`
   height: 100%;
 `;
 
-export const Row = styled.div`
+export const Row = styled.div<ContainerProps>`
   display: flex;
   flex-direction: row;
-  height: 100px;
+  height:${({ size }) => (typeof size === 'number' && (size / 3)) || 100}px;
 `;
 
-export const Box = styled.div`
+export const Box = styled.div<ContainerProps>`
+  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100px;
-  width: 100px;
+  height: ${({ size }) => (typeof size === 'number' && (size / 3)) || 100}px;
+  width: ${({ size }) => (typeof size === 'number' && (size / 3)) || 100}px;
   color: white;
-  font-size: 60px;
+  font-size: ${({ size }) => (typeof size === 'number' && (size / 5)) || 60}px;
   font-family: sans-serif;
 `;

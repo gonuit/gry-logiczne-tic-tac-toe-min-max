@@ -33,6 +33,7 @@ export interface PositionWithCost extends Position {
 
 export interface PositionInfo extends PositionWithCost {
   typeOfPlayer: Player;
+  seleced: boolean;
 }
 
 export type BestMoveConfig = {
@@ -147,13 +148,7 @@ export class TicTacBoard {
         return { ...position, cost };
       }
     );
-    if (typeof positionsWithCostsCallback === "function")
-      positionsWithCostsCallback(
-        positionsWithCost.map(positionsWithCost => ({
-          ...positionsWithCost,
-          typeOfPlayer
-        }))
-      );
+
     // Sortuj rosnąco/malejaco na podstawie kosztu i pobierz najwiekszy/najmniejszy koszt
     const [minMaxElem] = positionsWithCost.sort(
       maximizing
@@ -164,7 +159,22 @@ export class TicTacBoard {
     const minMaxElemsPositions: Array<
       PositionWithCost
     > = positionsWithCost.filter(({ cost }) => cost === minMaxElem.cost);
-    return this.getRandomItemFromArray(minMaxElemsPositions);
+    const selectedRandomPosition = this.getRandomItemFromArray(
+      minMaxElemsPositions
+    );
+    if (typeof positionsWithCostsCallback === "function")
+      positionsWithCostsCallback(
+        positionsWithCost.map(({ column, row, cost }) => ({
+          column,
+          row,
+          cost,
+          typeOfPlayer,
+          seleced:
+            selectedRandomPosition.column === column &&
+            selectedRandomPosition.row === row
+        }))
+      );
+    return selectedRandomPosition;
   };
 
   private getRandomItemFromArray = <T>(items: Array<T>): T =>
