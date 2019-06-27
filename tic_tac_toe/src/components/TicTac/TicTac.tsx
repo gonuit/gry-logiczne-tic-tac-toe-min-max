@@ -29,6 +29,7 @@ interface TicTacState {
   isYourTurn: boolean;
   values: TicTacBoardData;
   gameState: WinnerType;
+  started: boolean;
   rowsOfPossibilities: Array<PossibilityData>;
 }
 
@@ -41,7 +42,8 @@ export class TicTac extends React.Component<any, TicTacState> {
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY]
     ],
-    rowsOfPossibilities: []
+    rowsOfPossibilities: [],
+    started: false,
   };
 
   resetGame = () => {
@@ -53,7 +55,8 @@ export class TicTac extends React.Component<any, TicTacState> {
         [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY]
       ],
       rowsOfPossibilities: [],
-      gameState: WinnerType.NONE
+      gameState: WinnerType.NONE,
+      started: false,
     });
   };
 
@@ -66,7 +69,6 @@ export class TicTac extends React.Component<any, TicTacState> {
         }
       ]
     });
-    console.log("callback", positions);
   };
 
   checkIfGameEnded = (value: TicTacBoardData): WinnerType =>
@@ -75,12 +77,9 @@ export class TicTac extends React.Component<any, TicTacState> {
   handleEnemyTurn = () => {
     const { values } = this.state;
     const tb = new TicTacBoard(this.state.values);
-    const isEnd = tb.isEnd();
-    console.log("isEnd", isEnd);
     const bestMove: PositionWithCost = tb.getBestMove({
       positionsWithCostsCallback: this.generatePosibilitiesWithCosts
     });
-    console.log("getBestMove", bestMove);
     if (bestMove.column === -1) return console.log("Game end");
     values[bestMove.row][bestMove.column] = FieldType.O;
     this.setState({
@@ -94,13 +93,14 @@ export class TicTac extends React.Component<any, TicTacState> {
     const { isYourTurn, values } = this.state;
     if (!isYourTurn) return console.log("is not your turn");
     if (values[row][column] !== FieldType.EMPTY)
-      return console.warn("this field have been already taken");
+      return console.log("this field have been already taken");
     const tb = new TicTacBoard(this.state.values);
-    if (tb.isEnd() !== WinnerType.NONE) return console.warn("Game end");
+    if (tb.isEnd() !== WinnerType.NONE) return console.log("Game end");
 
     values[row][column] = FieldType.X;
     this.setState(
       {
+        started: true,
         values: values,
         gameState: this.checkIfGameEnded(values),
         isYourTurn: false
@@ -116,7 +116,6 @@ export class TicTac extends React.Component<any, TicTacState> {
     if (!prevValues) return console.error("prevValues undefined");
     this.setState(
       produce<TicTacState>((state: TicTacState) => {
-        const tb = new TicTacBoard(prevValues);
         state.rowsOfPossibilities.push({ positions, values: prevValues });
       })
     );
@@ -212,7 +211,7 @@ export class TicTac extends React.Component<any, TicTacState> {
   };
 
   render() {
-    const { gameState } = this.state;
+    const { gameState,started } = this.state;
     return (
       <Container>
         <MainView>
@@ -220,12 +219,10 @@ export class TicTac extends React.Component<any, TicTacState> {
             values={this.state.values}
             handleBoxPress={this.handleBoxPress}
           />
-          {gameState !== WinnerType.NONE && (
-            <>
-              <GameState>{this.gameStateToText(gameState)}</GameState>
-              <Button onClick={this.resetGame}>Play again</Button>
-            </>
-          )}
+          <GameState>{this.gameStateToText(gameState)}</GameState>
+          <Button disabled={!started} diableStyle={!started} onClick={this.resetGame}>
+            {gameState !== WinnerType.NONE ? "Play again" : "Restart"}
+          </Button>
         </MainView>
         {this.renderPosibilites()}
       </Container>

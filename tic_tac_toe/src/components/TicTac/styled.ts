@@ -48,19 +48,19 @@ export const GameState = styled.p`
   font-size: 18px;
   color: white;
 `
+interface ButtonProps {
+  diableStyle: boolean
+}
 
-export const Button = styled.button`
+export const Button = styled.button<ButtonProps>`
   margin: 10px 0;
   width: 200px;
   height: 40px;
-  background-color: orangered;
+  background-color: ${({ diableStyle }) => diableStyle ? 'grey' :'orangered'};
   color: white;
   border: none;
   font-family:sans-serif;
   border-radius: 5px;
-  &:hover {
-    opacity: 0.9;
-  }
   &:active {
     opacity: 0.5;
   }
