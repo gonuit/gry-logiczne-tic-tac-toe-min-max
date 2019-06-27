@@ -41,7 +41,11 @@ export type BestMoveConfig = {
   maximizing?: boolean;
   board?: TicTacBoard;
   position?: Position;
-  positionsWithCostsCallback?: (positionsWithCost: Array<PositionInfo>) => void;
+  currentValues?: TicTacBoardData;
+  positionsWithCostsCallback?: (
+    positionsWithCost: Array<PositionInfo>,
+    prevValues: TicTacBoardData | undefined
+  ) => void;
 };
 
 export class TicTacBoard {
@@ -113,7 +117,8 @@ export class TicTacBoard {
     maximizing = false,
     depth = 0,
     position = { column: -1, row: -1 },
-    positionsWithCostsCallback
+    positionsWithCostsCallback,
+    currentValues
   }: BestMoveConfig = {}): PositionWithCost => {
     const {
       MIN_MAX_DRAW_RESULT,
@@ -172,7 +177,8 @@ export class TicTacBoard {
           seleced:
             selectedRandomPosition.column === column &&
             selectedRandomPosition.row === row
-        }))
+        })),
+        currentValues
       );
     return selectedRandomPosition;
   };

@@ -18,12 +18,16 @@ import {
   Value
 } from "./styled";
 
+interface PossibilityData {
+  positions: Array<PositionInfo>;
+  values: TicTacBoardData;
+}
+
 interface TicTacState {
   isYourTurn: boolean;
   values: TicTacBoardData;
   gameState: WinnerType;
-  possibilitiesValue: TicTacBoardData;
-  rowsOfPossibilities: Array<PositionInfo>;
+  rowsOfPossibilities: Array<PossibilityData>;
 }
 
 export class TicTac extends React.Component<any, TicTacState> {
@@ -31,11 +35,6 @@ export class TicTac extends React.Component<any, TicTacState> {
     isYourTurn: true,
     gameState: WinnerType.NONE,
     values: [
-      [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
-      [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
-      [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY]
-    ],
-    possibilitiesValue: [
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY]
@@ -56,8 +55,12 @@ export class TicTac extends React.Component<any, TicTacState> {
 
   generatePosibilitiesWithCosts = (positions: Array<PositionInfo>) => {
     this.setState({
-      rowsOfPossibilities: positions,
-      possibilitiesValue: JSON.parse(JSON.stringify(this.state.values))
+      rowsOfPossibilities: [
+        {
+          positions,
+          values: JSON.parse(JSON.stringify(this.state.values)) // deep object copy
+        }
+      ]
     });
     console.log("callback", positions);
   };
@@ -102,25 +105,68 @@ export class TicTac extends React.Component<any, TicTacState> {
     );
   };
 
+  addNextPossibilitesRow = (positions: Array<PositionInfo>, prevValues?: TicTacBoardData) => {
+    if(!prevValues) return console.error('prevValues undefined')
+    this.setState(
+      produce<TicTacState>((state: TicTacState) => {
+        const tb = new TicTacBoard(prevValues);
+        state.rowsOfPossibilities.push({positions, values: prevValues});
+      })
+    );
+  };
+
+  handleAddNextPossibilityRow = (
+    currentValues: TicTacBoardData,
+    currentTypeOfPlayer: Player,
+    index: number
+  ) => () => {
+    console.log("NEXT");
+    this.setState(produce<TicTacState>((state) => {
+      state.rowsOfPossibilities.length = index + 1
+    }))
+    const tb = new TicTacBoard(currentValues);
+    tb.getBestMove({ 
+      positionsWithCostsCallback: this.addNextPossibilitesRow,
+       maximizing: currentTypeOfPlayer === Player.O ? true : false,
+       currentValues,
+       });
+  };
+
+  renderPossibilityRow = (
+    positions: Array<PositionInfo>,
+    values: TicTacBoardData,
+    possibilityRowIndex: number
+  ) => {
+    return positions.map(({ cost, column, row, typeOfPlayer, seleced }) => {
+      const currentValues = produce(values, draft => {
+        draft[row][column] =
+          typeOfPlayer === Player.X ? FieldType.X : FieldType.O;
+      });
+
+      return (
+        <PossibilityContainer
+          key={`${column}-${row}-${typeOfPlayer}`}
+          selected={seleced}
+          onClick={this.handleAddNextPossibilityRow(
+            currentValues,
+            typeOfPlayer,
+            possibilityRowIndex,
+          )}
+        >
+          <TicTacToeBoard size={100} values={currentValues} />
+          <Value>cost: {cost}</Value>
+        </PossibilityContainer>
+      );
+    });
+  };
+
   renderPosibilites = () => {
-    return (
-      <Possibilities>
-        {this.state.rowsOfPossibilities.map(
-          ({ cost, column, row, typeOfPlayer, seleced }) => (
-            <PossibilityContainer selected={seleced}>
-              <TicTacToeBoard
-                size={100}
-                key={`${column}-${row}-${typeOfPlayer}`}
-                values={produce(this.state.possibilitiesValue, draft => {
-                  draft[row][column] =
-                    typeOfPlayer === Player.X ? FieldType.X : FieldType.O;
-                })}
-              />
-              <Value>cost: {cost}</Value>
-            </PossibilityContainer>
-          )
-        )}
-      </Possibilities>
+    return this.state.rowsOfPossibilities.map(
+      ({ positions, values }, possibilityRowIndex) => (
+        <Possibilities key={`${possibilityRowIndex}-${positions.length}-${values.length}`}>
+          {this.renderPossibilityRow(positions, values, possibilityRowIndex)}
+        </Possibilities>
+      )
     );
   };
 
