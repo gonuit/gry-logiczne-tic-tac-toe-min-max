@@ -3,7 +3,7 @@ import { FieldType, TicTacBoardData } from "../TicTac/TicTacBoard";
 import { Container, Line, VertLine, Row, Box } from "./styled";
 
 interface TicTacToeBoardProps {
-  handleBoxPress?: (row: number, column: number) => (event: React.MouseEvent<HTMLBoxElement, MouseEvent>) => void
+  handleBoxPress?: (row: number, column: number) => (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
   values: TicTacBoardData
   highlight?: Position
 }
