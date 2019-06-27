@@ -7,9 +7,9 @@ const App: React.FC = () => {
     <div className="App">
       <header className="App-header">
         <p>
-          Tic tac toe
+          Tic-Tac-Toe
         </p>
-        <span>min-max example</span>
+        <span>an example of a min-max algorithm </span>
       </header>
       <div className="appContent">
       <TicTac />
