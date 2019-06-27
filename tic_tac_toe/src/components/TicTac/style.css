@@ -29,4 +29,7 @@
   align-items: center;
   height: 100px;
   width: 100px;
+  color: white;
+  font-size: 60px;
+  font-family: sans-serif;
 }
