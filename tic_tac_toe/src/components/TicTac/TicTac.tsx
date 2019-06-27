@@ -120,7 +120,7 @@ export class TicTac extends React.Component<any, TicTacState> {
   ) => {
     if (!prevValues) return console.error("prevValues undefined");
     this.setState(
-      produce<TicTacState>((state: TicTacState) => {
+      produce((state: TicTacState) => {
         state.rowsOfPossibilities.push({ positions, values: prevValues });
       })
     );
@@ -133,7 +133,7 @@ export class TicTac extends React.Component<any, TicTacState> {
     possibilityPositionIndex: number
   ) => () => {
     this.setState(
-      produce<TicTacState>(state => {
+      produce((state: TicTacState) => {
         state.rowsOfPossibilities.length = possibilityRowIndex + 1;
         state.rowsOfPossibilities[
           possibilityRowIndex
@@ -212,12 +212,14 @@ export class TicTac extends React.Component<any, TicTacState> {
           <LegendItemContainer>
             <LegendBoxSelected />
             <LegendBoxDescription>
-              - path selected by algorith
+              - path chosen by the algorithm
             </LegendBoxDescription>
           </LegendItemContainer>
           <LegendItemContainer>
             <LegendBoxClicked />
-            <LegendBoxDescription>- path selected by user</LegendBoxDescription>
+            <LegendBoxDescription>
+              - path chosen by the user
+            </LegendBoxDescription>
           </LegendItemContainer>
         </LegendContainer>
       </>
