@@ -12,9 +12,8 @@ Kamil Klyta 209356
     - [2.3.1 Wstęp, czym się kierować](#231-Wst%C4%99p-czym-si%C4%99-kierowa%C4%87)
     - [2.3.2. Funckcja kosztu](#232-Funckcja-kosztu)
   - [2.4. Optymalizacja algorytmu](#24-Optymalizacja-algorytmu)
-- [3.	Zastosowanie](#3-Zastosowanie)
-- [4.	Implementacja](#4-Implementacja)
-- [5.	Źródła](#5-%C5%B9r%C3%B3d%C5%82a)
+- [3.	Implementacja](#3-Implementacja)
+- [4.	Źródła](#4-%C5%B9r%C3%B3d%C5%82a)
 
 # 2.	Wstęp
 ## 2.1 Krótkie wprowadzenie (zastosowanie)
@@ -37,8 +36,7 @@ Rozważając założenia algorytmu, rozsądnym wydaje się wybór ścieżek w kt
 ### 2.3.2. Funckcja kosztu
 Funkcja kosztu definiuje ruchy przeprowadzane w grze. Na podstawie przyjętych przez nas założeń wybiera najlepsze dla nas ścieżki i przypisuje im odpowiednie wagi. Jej poprawne zdefiniowanie jest kluczowym elementem algorytmu min-max.
 ## 2.4. Optymalizacja algorytmu
-
-# 3.	Zastosowanie
-# 4.	Implementacja
-# 5.	Źródła
+Istnieją różne metody optymalizacji drzewa przeszukiwań, jedną z nich jest zmniejszanie zbioru przeszukiwanych danych (obcinanie drzewa). Jedną z metod obcinania jest metoda `alpha-beta pruning`. Metoda ta zakłada ustalenie jak sama nazwa mówi wartości `α` i `β` które pełnią rolę pewnego rodzaju ogranicznika rozważanych danch. Stanowią one bowie odpowiednio najmniejszą i największą rozważaną wartość węzła nadaną przez funkcje kosztu ([2.3.2](#232-Funckcja-kosztu))
+# 3.	Implementacja
+# 4.	Źródła
 
