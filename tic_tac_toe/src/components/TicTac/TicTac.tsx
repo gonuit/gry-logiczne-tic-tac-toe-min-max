@@ -1,20 +1,34 @@
 import React from "react";
-import "./style.css";
-import { TicTacBoard, TicTacBoardData, FieldType, PositionWithCost } from "./TicTacBoard";
+import { produce } from "immer";
+import {
+  TicTacBoard,
+  TicTacBoardData,
+  FieldType,
+  PositionWithCost,
+  WinnerType,
+  PositionInfo,
+  Player
+} from "./TicTacBoard";
+import { TicTacToeBoard } from "../TicTacToeBoard/TicTacToeBoard";
+import { Container, MainView, Possibilities } from "./styled";
 
 interface TicTacState {
   isYourTurn: boolean;
   values: TicTacBoardData;
+  gameState: WinnerType;
+  rowsOfPossibilities: Array<PositionInfo>;
 }
 
 export class TicTac extends React.Component<any, TicTacState> {
   state: TicTacState = {
     isYourTurn: true,
+    gameState: WinnerType.NONE,
     values: [
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY],
       [FieldType.EMPTY, FieldType.EMPTY, FieldType.EMPTY]
-    ]
+    ],
+    rowsOfPossibilities: []
   };
 
   resetGame = () => {
@@ -28,16 +42,30 @@ export class TicTac extends React.Component<any, TicTacState> {
     });
   };
 
+  generatePosibilitiesWithCosts = (positionsWithCosts: Array<PositionInfo>) => {
+    this.setState({
+      rowsOfPossibilities: positionsWithCosts
+    });
+    console.log("callback", positionsWithCosts);
+  };
+
+  checkIfGameEnded = (value: TicTacBoardData): WinnerType =>
+    new TicTacBoard(value).isEnd();
+
   handleEnemyTurn = () => {
-    const { values } = this.state
+    const { values } = this.state;
     const tb = new TicTacBoard(this.state.values);
-    console.log("isEnd", tb.isEnd());
-    const bestMove: PositionWithCost = tb.getBestMove()
+    const isEnd = tb.isEnd();
+    console.log("isEnd", isEnd);
+    const bestMove: PositionWithCost = tb.getBestMove({
+      positionsWithCostsCallback: this.generatePosibilitiesWithCosts
+    });
     console.log("getBestMove", bestMove);
-    if(bestMove.column === -1) return console.log('Game end')
-    values[bestMove.row][bestMove.column] = FieldType.O
+    if (bestMove.column === -1) return console.log("Game end");
+    values[bestMove.row][bestMove.column] = FieldType.O;
     this.setState({
       values,
+      gameState: this.checkIfGameEnded(values),
       isYourTurn: true
     });
   };
@@ -47,73 +75,42 @@ export class TicTac extends React.Component<any, TicTacState> {
     if (!isYourTurn) return console.log("is not your turn");
     if (values[row][column] !== FieldType.EMPTY)
       return console.warn("this field have been already taken");
+    const tb = new TicTacBoard(this.state.values);
+    if (tb.isEnd() !== WinnerType.NONE) return console.warn("Game end");
+
     values[row][column] = FieldType.X;
     this.setState(
       {
         values: values,
+        gameState: this.checkIfGameEnded(values),
         isYourTurn: false
       },
       this.handleEnemyTurn
     );
   };
 
-  getCircleOrCross = (row: number, column: number): string => {
-    const value = this.state.values[row][column];
-    switch (value) {
-      case FieldType.X:
-        return "X";
-      case FieldType.O:
-        return "O";
-      default:
-        return "";
-    }
-  };
-
   render() {
     return (
-      <div className="tictac-container">
-        <div className="tictac-row">
-          <div className="tictac-box" onClick={this.handleBoxPress(0, 0)}>
-            {this.getCircleOrCross(0, 0)}
-          </div>
-          <div className="tictac-vert-line" />
-          <div className="tictac-box" onClick={this.handleBoxPress(0, 1)}>
-            {this.getCircleOrCross(0, 1)}
-          </div>
-          <div className="tictac-vert-line" />
-          <div className="tictac-box" onClick={this.handleBoxPress(0, 2)}>
-            {this.getCircleOrCross(0, 2)}
-          </div>
-        </div>
-        <div className="tictac-line" />
-        <div className="tictac-row">
-          <div className="tictac-box" onClick={this.handleBoxPress(1, 0)}>
-            {this.getCircleOrCross(1, 0)}
-          </div>
-          <div className="tictac-vert-line" />
-          <div className="tictac-box" onClick={this.handleBoxPress(1, 1)}>
-            {this.getCircleOrCross(1, 1)}
-          </div>
-          <div className="tictac-vert-line" />
-          <div className="tictac-box" onClick={this.handleBoxPress(1, 2)}>
-            {this.getCircleOrCross(1, 2)}
-          </div>
-        </div>
-        <div className="tictac-line" />
-        <div className="tictac-row">
-          <div className="tictac-box" onClick={this.handleBoxPress(2, 0)}>
-            {this.getCircleOrCross(2, 0)}
-          </div>
-          <div className="tictac-vert-line" />
-          <div className="tictac-box" onClick={this.handleBoxPress(2, 1)}>
-            {this.getCircleOrCross(2, 1)}
-          </div>
-          <div className="tictac-vert-line" />
-          <div className="tictac-box" onClick={this.handleBoxPress(2, 2)}>
-            {this.getCircleOrCross(2, 2)}
-          </div>
-        </div>
-      </div>
+      <Container>
+        <MainView>
+        <TicTacToeBoard
+          values={this.state.values}
+          handleBoxPress={this.handleBoxPress}
+        />
+        </MainView>
+        <Possibilities>
+          {this.state.rowsOfPossibilities.map(
+            ({ column, row, typeOfPlayer }) => (
+              <TicTacToeBoard
+                values={produce(this.state.values, draft => {
+                  draft[row][column] =
+                    typeOfPlayer === Player.X ? FieldType.X : FieldType.O;
+                })}
+              />
+            )
+          )}
+        </Possibilities>
+      </Container>
     );
   }
 }

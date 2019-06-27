@@ -1,29 +1,30 @@
-.tictac-container {
+import styled from "styled-components";
+
+export const Container = styled.div`
   height: 300px;
   width: 300px;
   display: flex;
   flex-direction: column;
-}
-
-.tictac-line {
+`;
+export const Line = styled.div`
   height: 1px;
   background-color: white;
   width: 100%;
-}
+`;
 
-.tictac-vert-line {
+export const VertLine = styled.div`
   width: 1px;
   background-color: white;
   height: 100%;
-}
+`;
 
-.tictac-row {
+export const Row = styled.div`
   display: flex;
   flex-direction: row;
   height: 100px;
-}
+`;
 
-.tictac-box {
+export const Box = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -32,4 +33,4 @@
   color: white;
   font-size: 60px;
   font-family: sans-serif;
-}
+`;

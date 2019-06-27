@@ -31,11 +31,16 @@ export interface PositionWithCost extends Position {
   cost: number;
 }
 
+export interface PositionInfo extends PositionWithCost {
+  typeOfPlayer: Player;
+}
+
 export type BestMoveConfig = {
   depth?: number;
   maximizing?: boolean;
   board?: TicTacBoard;
   position?: Position;
+  positionsWithCostsCallback?: (positionsWithCost: Array<PositionInfo>) => void;
 };
 
 export class TicTacBoard {
@@ -106,7 +111,8 @@ export class TicTacBoard {
   getBestMove = ({
     maximizing = false,
     depth = 0,
-    position = { column: -1, row: -1 }
+    position = { column: -1, row: -1 },
+    positionsWithCostsCallback
   }: BestMoveConfig = {}): PositionWithCost => {
     const {
       MIN_MAX_DRAW_RESULT,
@@ -125,25 +131,29 @@ export class TicTacBoard {
           return { ...position, cost: MIN_MAX_DRAW_RESULT };
       }
     }
+    const typeOfPlayer: Player = maximizing ? Player.X : Player.O;
     // Pobierz możliwe pozycje
     const possiblePositions: Array<Position> = this.getPossiblePositions();
     const positionsWithCost: Array<PositionWithCost> = possiblePositions.map<
       PositionWithCost
     >(
       (position: Position): PositionWithCost => {
-        const newBoard: TicTacBoard = this.put(
-          position,
-          maximizing ? Player.X : Player.O
-        );
-        const elem = newBoard.getBestMove({
+        const newBoard: TicTacBoard = this.put(position, typeOfPlayer);
+        const { cost } = newBoard.getBestMove({
           maximizing: !maximizing,
           depth: depth + MIN_MAX_DEPTH_INCREMENT_VALUE,
           position
         });
-        const { cost } = elem;
         return { ...position, cost };
       }
     );
+    if (typeof positionsWithCostsCallback === "function")
+      positionsWithCostsCallback(
+        positionsWithCost.map(positionsWithCost => ({
+          ...positionsWithCost,
+          typeOfPlayer
+        }))
+      );
     // Sortuj rosnąco/malejaco na podstawie kosztu i pobierz najwiekszy/najmniejszy koszt
     const [minMaxElem] = positionsWithCost.sort(
       maximizing
