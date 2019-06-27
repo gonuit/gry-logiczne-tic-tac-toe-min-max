@@ -1,14 +1,12 @@
-
-
 export enum Player {
   X,
-  O,
+  O
 }
 
 export enum FieldType {
   X,
   O,
-  NONE,
+  NONE
 }
 
 export enum WinnerType {
@@ -30,15 +28,15 @@ export type Position = {
 };
 
 export type BestMoveConfig = {
-  depth?: number
-  maximizing: boolean
-  board?: TicTacBoard
-}
+  depth?: number;
+  maximizing: boolean;
+  board?: TicTacBoard;
+};
 
 export class TicTacBoard {
   private static BOARD_SIZE = 3;
-  private static MIN_MAX_RESULT_VALUE = 10
-  private static MIN_MAX_DRAW_RESULT = 0
+  private static MIN_MAX_RESULT_VALUE = 10;
+  private static MIN_MAX_DRAW_RESULT = 0;
 
   constructor(private values: TicTacBoardData) {}
 
@@ -59,7 +57,9 @@ export class TicTacBoard {
           elem => typeof elem === "boolean" && elem === this.values[index][0]
         )
       ) {
-        return this.values[index][0] === FieldType.X ? WinnerType.X : WinnerType.O;
+        return this.values[index][0] === FieldType.X
+          ? WinnerType.X
+          : WinnerType.O;
       }
       const firstValue = this.values[0][index];
       if (firstValue === null) continue;
@@ -72,41 +72,45 @@ export class TicTacBoard {
       }
     }
     return WinnerType.NONE;
-  }
+  };
   put = (position: Position, player: Player): TicTacBoard => {
-    const values = JSON.parse(JSON.stringify(this.values)) // prevent shallow copy
-    values[position.row][position.column] = Player.O ? false : true
-    return new TicTacBoard(values[position.row][position.column])
+    const values = JSON.parse(JSON.stringify(this.values)); // prevent shallow copy
+    values[position.row][position.column] = Player.O ? false : true;
+    return new TicTacBoard(values[position.row][position.column]);
   };
 
   getPossiblePositions = (): Array<Position> => {
-    const possiblePositions: Array<Position> = []
-      const { BOARD_SIZE } = TicTacBoard 
-      for(let row = 0; row < BOARD_SIZE; row++) {
-        for(let column = 0; column < BOARD_SIZE; column++) {
-          if(this.values[row][column] === FieldType.NONE) possiblePositions.push({ row, column })
-        }
-      }
-      return possiblePositions;
-  }
-
-
-  getBestMove = ({ board = this, maximizing = true, depth = 0}: BestMoveConfig): number | undefined => {
-
-    // Jeśli gra zakończona zwróć wartość
-    const isEnd = board.isEnd()
-		if(isEnd !== WinnerType.NONE) {
-      const { MIN_MAX_DRAW_RESULT, MIN_MAX_RESULT_VALUE } = TicTacBoard 
-      switch(isEnd) {
-        case WinnerType.X: return MIN_MAX_RESULT_VALUE - depth;
-        case WinnerType.O: return -MIN_MAX_RESULT_VALUE + depth;
-        case WinnerType.REMIS: return MIN_MAX_DRAW_RESULT
+    const possiblePositions: Array<Position> = [];
+    const { BOARD_SIZE } = TicTacBoard;
+    for (let row = 0; row < BOARD_SIZE; row++) {
+      for (let column = 0; column < BOARD_SIZE; column++) {
+        if (this.values[row][column] === FieldType.NONE)
+          possiblePositions.push({ row, column });
       }
     }
-    if(maximizing) this.maximize()
-  }
+    return possiblePositions;
+  };
 
-  private maximize = () => {
+  getBestMove = ({
+    board = this,
+    maximizing = true,
+    depth = 0
+  }: BestMoveConfig): number | undefined => {
+    // Jeśli gra zakończona zwróć wartość
+    const isEnd = board.isEnd();
+    if (isEnd !== WinnerType.NONE) {
+      const { MIN_MAX_DRAW_RESULT, MIN_MAX_RESULT_VALUE } = TicTacBoard;
+      switch (isEnd) {
+        case WinnerType.X:
+          return MIN_MAX_RESULT_VALUE - depth;
+        case WinnerType.O:
+          return -MIN_MAX_RESULT_VALUE + depth;
+        case WinnerType.REMIS:
+          return MIN_MAX_DRAW_RESULT;
+      }
+    }
+    if (maximizing) this.maximize();
+  };
 
-  }
+  private maximize = () => {};
 }
