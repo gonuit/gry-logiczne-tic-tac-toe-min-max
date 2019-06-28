@@ -1,11 +1,11 @@
 import styled from "styled-components";
 
 interface ContainerProps {
-  size?: number
+  size?: number;
 }
 
 export const Container = styled.div<ContainerProps>`
-  height:${({ size }) => size || 300}px;
+  height: ${({ size }) => size || 300}px;
   width: ${({ size }) => size || 300}px;
   display: inline-block;
   vertical-align: top;
@@ -26,17 +26,18 @@ export const VertLine = styled.div`
 export const Row = styled.div<ContainerProps>`
   display: flex;
   flex-direction: row;
-  height:${({ size }) => (typeof size === 'number' && (size / 3)) || 100}px;
+  height: ${({ size }) => (typeof size === "number" && size / 3) || 100}px;
 `;
 
 export const Box = styled.div<ContainerProps>`
+  user-select: none;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: ${({ size }) => (typeof size === 'number' && (size / 3)) || 100}px;
-  width: ${({ size }) => (typeof size === 'number' && (size / 3)) || 100}px;
+  height: ${({ size }) => (typeof size === "number" && size / 3) || 100}px;
+  width: ${({ size }) => (typeof size === "number" && size / 3) || 100}px;
   color: white;
-  font-size: ${({ size }) => (typeof size === 'number' && (size / 5)) || 60}px;
+  font-size: ${({ size }) => (typeof size === "number" && size / 5) || 60}px;
   font-family: sans-serif;
 `;

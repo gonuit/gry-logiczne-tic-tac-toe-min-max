@@ -151,7 +151,6 @@ export class TicTac extends React.Component<any, TicTacState> {
     tb.getBestMove({
       positionsWithCostsCallback: this.addNextPossibilitesRow,
       maximizing: currentTypeOfPlayer === Player.O ? true : false,
-      currentValues
     });
   };
 

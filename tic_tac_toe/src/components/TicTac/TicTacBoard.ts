@@ -40,9 +40,7 @@ export interface PositionInfo extends PositionWithCost {
 export type BestMoveConfig = {
   depth?: number;
   maximizing?: boolean;
-  board?: TicTacBoard;
   position?: Position;
-  currentValues?: TicTacBoardData;
   positionsWithCostsCallback?: (
     positionsWithCost: Array<PositionInfo>,
     prevValues: TicTacBoardData | undefined
@@ -119,7 +117,6 @@ export class TicTacBoard {
     depth = 0,
     position = { column: -1, row: -1 },
     positionsWithCostsCallback,
-    currentValues
   }: BestMoveConfig = {}): PositionWithCost => {
     const {
       MIN_MAX_DRAW_RESULT,
@@ -179,7 +176,7 @@ export class TicTacBoard {
             selectedRandomPosition.column === column &&
             selectedRandomPosition.row === row
         })),
-        currentValues
+        this.values
       );
     return selectedRandomPosition;
   };
