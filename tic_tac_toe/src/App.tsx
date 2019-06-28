@@ -9,7 +9,7 @@ const App: React.FC = () => {
         <p>
           Tic-Tac-Toe
         </p>
-        <span>an example of a min-max algorithm </span>
+        <span>an example of a min-max algorithm</span>
       </header>
       <div className="appContent">
       <TicTac />
